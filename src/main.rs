@@ -7,11 +7,13 @@ const PADDLE_SIZE: Vec2 = Vec2::new(120.0,20.0);
 const COLOR_PADDLE: Color = Color::srgb(0.3,0.7,1.0);
 const Z_BACKGROUNG: f32 = -1.0;
 const Z_PADDLE:f32 = 1.0;
+const PADDLE_SPEED: f32 = 300.0;
 
 fn main() {
     App::new()
     .add_plugins(DefaultPlugins)
     .add_systems(Startup,setup)
+    .add_systems(FixedUpdate, move_paddle)
     .run();
 }
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>){
@@ -40,4 +42,25 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>){
         },
         Paddle,
     ));
+}
+
+fn move_paddle(keybord_input: Res<ButtonInput<KeyCode>>, time: Res<Time>, mut query: Query<&mut Transform,With<Paddle>>,){
+    let mut direction = 0.0;
+
+    if keybord_input.pressed(KeyCode::ArrowLeft){
+        direction -= 1.0;
+    }
+    if keybord_input.pressed(KeyCode::ArrowRight){
+        direction += 1.0;
+    }
+
+    if direction == 0.0{
+        return;
+    }
+
+    let delta = direction * PADDLE_SPEED * time.delta_secs();
+
+    for mut transform in &mut query{
+        transform.translation.x += delta;
+    }
 }
